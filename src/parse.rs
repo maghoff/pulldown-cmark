@@ -130,6 +130,7 @@ bitflags! {
         const ENABLE_FOOTNOTES = 1 << 2;
         const ENABLE_STRIKETHROUGH = 1 << 3;
         const ENABLE_TASKLISTS = 1 << 4;
+        const DISABLE_HTML = 1 << 5;
     }
 }
 
@@ -360,7 +361,7 @@ impl<'a> FirstPass<'a> {
         let ix = start_ix + line_start.bytes_scanned();
 
         // HTML Blocks
-        if self.text.as_bytes()[ix] == b'<' {
+        if self.text.as_bytes()[ix] == b'<' && !self.options.contains(Options::DISABLE_HTML) {
             // Types 1-5 are all detected by one function and all end with the same
             // pattern
             if let Some(html_end_tag_ix) = get_html_end_tag(&bytes[(ix + 1)..]) {
@@ -692,7 +693,7 @@ impl<'a> FirstPass<'a> {
                     begin_text = ix + count;
                     LoopInstruction::ContinueAndSkip(count - 1)
                 }
-                b'<' => {
+                b'<' if !self.options.contains(Options::DISABLE_HTML) => {
                     // Note: could detect some non-HTML cases and early escape here, but not
                     // clear that's a win.
                     self.tree.append_text(begin_text, ix);
