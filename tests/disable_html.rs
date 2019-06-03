@@ -210,3 +210,17 @@ fn disable_html_test_8() {
 
     assert_eq!(expected, s);
 }
+
+#[test]
+fn disable_html_test_allows_links() {
+    let original = r##"Markdown link: <http://example.com>"##;
+    let expected = r##"<p>Markdown link: <a href="http://example.com">http://example.com</a></p>
+"##;
+
+    let mut s = String::new();
+
+    let p = Parser::new_ext(&original, Options::DISABLE_HTML);
+    html::push_html(&mut s, p);
+
+    assert_eq!(expected, s);
+}
